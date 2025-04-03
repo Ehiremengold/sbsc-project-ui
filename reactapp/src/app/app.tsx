@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import SendButton from '../components/ui/SendButton';
 import { WebSocketService } from 'shared-websocket/src/lib/websocketService';
 
@@ -12,24 +12,16 @@ interface RealTimeEditorProps {
  */
 const App = ({ onTextChange }: RealTimeEditorProps) => {
   const [text, setText] = useState('');
-  const [wsService, setWsService] = useState<WebSocketService | null>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
-    const socketUrl = 'ws://localhost:8080'; // Replace with your WebSocket server URL
-    const ws = new WebSocketService(socketUrl);
-    setWsService(ws);
-
-    // Cleanup function to close the WebSocket connection when the component unmounts
-    return () => {
-      ws.closeConnection();
-    };
+    inputRef?.current?.focus();
   }, []);
 
   const handleChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newText = event.target.value;
     setText(newText);
     onTextChange(newText);
-    wsService?.sendMessage(newText);
   };
 
   return (
@@ -43,10 +35,14 @@ const App = ({ onTextChange }: RealTimeEditorProps) => {
           <span className="font-bold">&#183;</span> Build
         </p>
       </div>
-      <div className="border w-4/5 h-[700px] overflow-scroll p-3 rounded-md shadow-md relative">
-        <div className="flex justify-end items-center gap-4 absolute bottom-10 right-8 left-8">
+      <div className="border w-4/5 h-[700px] p-3 rounded-md shadow-md relative">
+        <div className="h-[600px] overflow-scroll border">
+
+        </div>
+        <div className="flex justify-end items-center gap-4 absolute bottom-5 right-3 left-3">
           <textarea
-            className="border flex-1 h-10 p-2 rounded-md shadow-md"
+            ref={inputRef}
+            className="border flex-1 h-10 p-2 rounded-md shadow-md outline-[#F26722] resize-none"
             value={text}
             placeholder="Start typing..."
             onChange={handleChange}
