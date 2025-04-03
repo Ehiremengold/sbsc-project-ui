@@ -1,15 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
 import SendButton from '../components/ui/SendButton';
-import { WebSocketService } from 'shared-websocket/src/lib/websocketService';
+import { AvatarCircles } from '../components/ui/AvatarCircles';
+import { avatars } from '../lib/utils';
 
 interface RealTimeEditorProps {
   onTextChange: (text: string) => void;
 }
 
-/**
- * This is a simple real-time editor component that takes a callback function
- * as a prop and calls it whenever the text in the textarea changes.
- */
 const App = ({ onTextChange }: RealTimeEditorProps) => {
   const [text, setText] = useState('');
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -25,7 +22,7 @@ const App = ({ onTextChange }: RealTimeEditorProps) => {
   };
 
   return (
-    <main className="flex flex-col  gap-16 h-screen max-w-4xl mx-auto my-auto place-items-center mt-20">
+    <main className="flex flex-col gap-16 h-screen max-w-4xl mx-auto my-auto place-items-center mt-14">
       <div className="text-center">
         <h1 className="text-4xl lg:text-7xl font-bold text-[#F26722]">
           Hi SBSC Team!
@@ -35,10 +32,18 @@ const App = ({ onTextChange }: RealTimeEditorProps) => {
           <span className="font-bold">&#183;</span> Build
         </p>
       </div>
-      <div className="border w-4/5 h-[700px] p-3 rounded-md shadow-md relative">
-        <div className="h-[600px] overflow-scroll border">
-
+      <div className="border w-4/5 h-[800px] p-3 relative">
+        <div className="flex justify-between items-center">
+          <div>
+            <h2 className="text-xl font-bold text-[#F26722]">#devOps-team</h2>
+            <p className="text-gray-500 text-sm font-normal">
+              4 members online
+            </p>
+          </div>
+          <AvatarCircles numPeople={12} avatarUrls={avatars} />
         </div>
+        <div className="h-[2px] bg-[#F26722] w-full mt-2"></div>
+        {/* <div className="h-[650px] overflow-scroll border mt-5"></div> */}
         <div className="flex justify-end items-center gap-4 absolute bottom-5 right-3 left-3">
           <textarea
             ref={inputRef}
