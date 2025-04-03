@@ -1,0 +1,16 @@
+{
+  "name": "reactapp",
+  "$schema": "../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "reactapp/src",
+  "projectType": "application",
+  "tags": [],
+  "targets": {
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "reactapp/jest.config.ts"
+      }
+    }
+  }
+}
