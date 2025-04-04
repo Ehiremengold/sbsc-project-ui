@@ -8,9 +8,6 @@
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "paths": {
-      "shared-websocket": [
-        "libs/shared/websocket/src/index.ts"
-      ]
     }
   },
   "files": [],

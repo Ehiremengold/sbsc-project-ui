@@ -1,7 +1,7 @@
 import { StrictMode } from 'react';
 import * as ReactDOM from 'react-dom/client';
-import { BrowserRouter } from 'react-router-dom';
-
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import Collaboration from './pages/Collaboration';
 import App from './app/app';
 
 const root = ReactDOM.createRoot(
@@ -10,7 +10,10 @@ const root = ReactDOM.createRoot(
 root.render(
   <StrictMode>
     <BrowserRouter>
-      <App />
+      <Routes>
+        <Route path="/" element={<App />}></Route>
+        <Route path="/collaboration" element={<Collaboration />} />
+      </Routes>
     </BrowserRouter>
   </StrictMode>
 );

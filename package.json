@@ -14,10 +14,13 @@
     "@angular/platform-browser-dynamic": "~18.2.0",
     "@angular/router": "~18.2.0",
     "empty": "0.10.1",
+    "express": "^5.1.0",
+    "framer-motion": "^12.6.3",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "react-router-dom": "6.11.2",
     "rxjs": "~7.8.0",
+    "ws": "^8.18.1",
     "zone.js": "~0.14.3"
   },
   "devDependencies": {
