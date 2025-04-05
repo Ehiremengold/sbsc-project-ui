@@ -5,6 +5,12 @@ import TeamHeader from '../components/TeamHeader';
 import { Message, SendMessageData } from '../lib/types';
 import { motion, AnimatePresence } from 'framer-motion';
 
+const Env = "Prod" // or "Dev"
+
+const websocketUrl = () => { 
+  return Env === "Prod" ? 'wss://sbsc-project-server.onrender.com' : 'ws://localhost:8000'
+}
+
 const Collaboration = () => {
   const [text, setText] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
@@ -18,7 +24,7 @@ const Collaboration = () => {
 
   useEffect(() => {
     
-    const socket = new WebSocket('wss://sbsc-project-server.onrender.com');
+    const socket = new WebSocket(websocketUrl());
 
     socketRef.current = socket;
 
@@ -32,11 +38,6 @@ const Collaboration = () => {
         event.data instanceof Blob ? await event.data.text() : event.data;
       try {
         const data = JSON.parse(dataText);
-
-        if (!data || !data?.type) {
-          console.warn('Received unknown or malformed message:', data);
-          return;
-        }
 
         switch (data.type) {
           case 'INIT':
@@ -252,7 +253,12 @@ const Collaboration = () => {
             value={text}
             placeholder="Start typing..."
             onChange={handleChange}
-            onKeyPress={handleKeyPress}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                handleSend();
+                e.preventDefault(); // Prevents the default behavior of adding a new line
+              }
+            }}
           />
           <SendButton onClick={handleSend} />
         </motion.div>
