@@ -24,3 +24,15 @@ export const avatars = [
     profileUrl: "https://github.com/itsarghyadas",
   },
 ];
+
+
+export const assignAvatar = (name: string) => {
+  // Check if avatar is already stored for the user
+  const existing = localStorage.getItem(`avatar-${name}`);
+  if (existing) return existing;
+
+  // Otherwise, randomly assign one and store it
+  const random = avatars[Math.floor(Math.random() * avatars.length)];
+  localStorage.setItem(`avatar-${name}`, random.imageUrl);
+  return random;
+};

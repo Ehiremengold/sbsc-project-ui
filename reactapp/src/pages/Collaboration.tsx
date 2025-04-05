@@ -2,14 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import SendButton from '../components/SendButton';
 import { useNavigate } from 'react-router-dom';
 import TeamHeader from '../components/TeamHeader';
-
-interface Message {
-  id: string;
-  user: string;
-  text: string;
-  avatar: string;
-  timestamp: number;
-}
+import { Message, SendMessageData } from '../lib/types';
 
 const Collaboration = () => {
   const [text, setText] = useState('');
@@ -20,10 +13,11 @@ const Collaboration = () => {
 
   // Get user name from localStorage
   const name = localStorage.getItem('userName') || '';
+  const avatar = localStorage.getItem('userAvatar') || 'https://i.imgur.com/8Kx8x8x.png';
 
   useEffect(() => {
-    if (!name) {
-      navigate('/'); // Redirect if no name is set
+    if (!name || !avatar) {
+      navigate('/'); 
       return;
     }
     const socket = new WebSocket('ws://localhost:8000');
@@ -125,7 +119,14 @@ const Collaboration = () => {
     }
   };
 
-  const sendMessage = (data: any) => {
+  const handleKeyPress = (event: React.KeyboardEvent) => {
+    if (event.key === 'Enter') {
+      event.preventDefault(); // Prevents the default behavior of adding a new line
+      handleSend();
+    }
+  };
+
+  const sendMessage = (data: SendMessageData) => {
     if (!data || typeof data !== 'object' || !data.type) {
       console.warn('Invalid message attempted:', data);
       return;
@@ -209,6 +210,7 @@ const Collaboration = () => {
             value={text}
             placeholder="Start typing..."
             onChange={handleChange}
+            onKeyPress={handleKeyPress}
           />
           <SendButton onClick={handleSend} />
         </div>

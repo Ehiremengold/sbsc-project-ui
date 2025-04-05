@@ -35,7 +35,7 @@ wss.on('connection', (ws) => {
             id: uuidv4(),
             user: data.user,
             text: data.message,
-            avatar: avatars[Math.floor(Math.random() * avatars.length)],
+            avatar: data.avatar || avatars[Math.floor(Math.random() * avatars.length)],
             timestamp: Date.now(),
           };
           messages.push(newMessage);

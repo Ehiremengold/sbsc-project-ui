@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { motion } from 'framer-motion';
+import { assignAvatar } from '../lib/utils';
 
 const Entrance = () => {
   const [input, setInput] = useState('');
@@ -12,10 +13,18 @@ const Entrance = () => {
       setError('Please enter your name to continue.');
       return;
     }
-
-    // Save the name in localStorage
+    const avatar = assignAvatar(input.trim());
+  
+    // Save the name and avatar in localStorage
     localStorage.setItem('userName', input.trim());
+    localStorage.setItem('userAvatar', avatar.toString());
     navigate('/collaboration');
+  };
+
+  const handleKeyPress = (event: React.KeyboardEvent) => {
+    if (event.key === 'Enter') {
+      handleJoin();
+    }
   };
 
   return (
@@ -53,6 +62,7 @@ const Entrance = () => {
             setInput(e.target.value);
             if (error) setError('');
           }}
+          onKeyPress={handleKeyPress}
           className={`border rounded-md p-3 w-full outline-none focus:border-[#F26722] focus:ring-1 focus:ring-[#F26722] ${
             error ? 'border-red-500' : ''
           }`}
