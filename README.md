@@ -31,7 +31,7 @@ This collaborative real-time editing platform enables seamless team collaboratio
 sbsc-workspace/
 │
 ├── angularapp/         # Angular application
-│   └── ws-server/      # WebSocket server
+│   └── ws-server/ws-server.js      # WebSocket server
 ├── reactapp/           # React application
 ├── angularapp-e2e/     # End-to-end tests for Angular app
 ├── reactapp-e2e/       # End-to-end tests for React app
