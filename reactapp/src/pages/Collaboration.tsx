@@ -1,13 +1,14 @@
 import { useState, useEffect, useRef } from 'react';
-import SendButton from '../components/ui/SendButton';
-import { AvatarCircles } from '../components/ui/AvatarCircles';
-import { avatars } from '../lib/utils';  // You can adjust this import as per your needs
+import SendButton from '../components/SendButton';
 import { useNavigate } from 'react-router-dom';
+import TeamHeader from '../components/TeamHeader';
 
 interface Message {
+  id: string;
   user: string;
   text: string;
   avatar: string;
+  timestamp: number;
 }
 
 const Collaboration = () => {
@@ -31,41 +32,53 @@ const Collaboration = () => {
 
     socket.onopen = () => {
       console.log('WebSocket Connected');
+      console.log('WebSocket Ready State:', socket.readyState); // debugging line
     };
 
     socket.onmessage = async (event) => {
-      if (event.data instanceof Blob) {
-        // Convert Blob to text
-        const textData = await event.data.text();
-        try {
-          const data = JSON.parse(textData); // Now parse the JSON string
-          console.log('Received message:', data.message);
+      const dataText =
+        event.data instanceof Blob ? await event.data.text() : event.data;
+      try {
+        const data = JSON.parse(dataText);
 
-          setMessages((prevMessages) => [
-            ...prevMessages,
-            { user: data.user, text: data.message, avatar: data.avatar },
-          ]);
-        } catch (error) {
-          console.error('Error parsing JSON:', error);
+        if (!data || !data?.type) {
+          console.warn('Received unknown or malformed message:', data);
+          return;
         }
-      } else if (typeof event.data === 'string') {
-        // Handle case where message is a string (fallback)
-        try {
-          const data = JSON.parse(event.data); // Now parse the JSON string
-          console.log('Received message:', data.message);
 
-          setMessages((prevMessages) => [
-            ...prevMessages,
-            { user: data.user, text: data.message, avatar: data.avatar },
-          ]);
-        } catch (error) {
-          console.error('Error parsing JSON:', error);
+        switch (data.type) {
+          case 'INIT':
+            console.log("INIT received:", data.messages);
+            setMessages(data.messages);
+            break;
+
+          case 'NEW_MESSAGE':
+            setMessages((prev) => [...prev, data.message]);
+            break;
+
+          case 'EDIT_MESSAGE':
+            setMessages((prev) =>
+              prev.map((msg) =>
+                msg.id === data.id ? { ...msg, text: data.newText } : msg
+              )
+            );
+            break;
+
+          case 'DELETE_MESSAGE':
+            setMessages((prev) => prev.filter((msg) => msg.id !== data.id));
+            break;
+
+          case 'CLEAR_ALL':
+            setMessages([]);
+            break;
+
+          default:
+            console.warn('Unknown message type:', data.type);
         }
-      } else {
-        console.error('Unexpected WebSocket data type:', typeof event.data);
+      } catch (err) {
+        console.error('Failed to parse message', err);
       }
     };
-
 
     socket.onerror = (error) => {
       console.error('WebSocket Error:', error);
@@ -93,14 +106,37 @@ const Collaboration = () => {
   };
 
   const handleSend = () => {
-    // Send the message via WebSocket
-    if (text.trim() && socketRef.current) {
-      console.log('Sending message:', text);
-      socketRef.current.send(
-        JSON.stringify({ user: name, message: text })
-      );
-      setText(''); // Clear the input after sending
+    if (text.trim()) {
+      sendMessage({ type: 'SEND', user: name, message: text });
+      setText('');
     }
+  };
+
+  const handleEdit = (id: string, oldText: string) => {
+    const newText = prompt('Edit your message:', oldText);
+    if (newText) {
+      sendMessage({ type: 'EDIT', id, newText });
+    }
+  };
+
+  const handleDelete = (id: string) => {
+    if (window.confirm('Are you sure you want to delete this message?')) {
+      sendMessage({ type: 'DELETE', id });
+    }
+  };
+
+  const sendMessage = (data: any) => {
+    if (!data || typeof data !== 'object' || !data.type) {
+      console.warn('Invalid message attempted:', data);
+      return;
+    }
+
+    if (!socketRef.current || socketRef.current.readyState !== WebSocket.OPEN) {
+      console.warn('WebSocket not ready. Message not sent:', data);
+      return;
+    }
+
+    socketRef.current.send(JSON.stringify(data));
   };
 
   return (
@@ -112,15 +148,7 @@ const Collaboration = () => {
         </p>
       </div>
       <div className="border w-4/5 h-[800px] p-3 relative">
-        <div className="flex justify-between items-center">
-          <div>
-            <h2 className="text-xl font-bold text-[#F26722]">#devOps-team</h2>
-            <p className="text-gray-500 text-sm font-normal">
-              Online <span className="text-[#F26722]">●</span> 4
-            </p>
-          </div>
-          <AvatarCircles numPeople={12} avatarUrls={avatars} />
-        </div>
+        <TeamHeader sendMessage={sendMessage} />
         <div className="h-[2px] bg-[#F26722] w-full mt-2"></div>
 
         {/* Real-time message display */}
@@ -145,6 +173,29 @@ const Collaboration = () => {
               />
               <div className="bg-[#F26722] text-white p-2 rounded-md max-w-[70%]">
                 {message.text}
+                <div className="text-xs text-gray-200 mt-1">
+                  {new Date(message.timestamp).toLocaleTimeString([], {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })}
+                </div>
+
+                {message.user === name && (
+                  <div className="text-sm text-right text-gray-400">
+                    <button
+                      onClick={() => handleEdit(message.id, message.text)}
+                      className="mr-2 hover:text-yellow-500"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleDelete(message.id)}
+                      className="hover:text-red-500"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           ))}

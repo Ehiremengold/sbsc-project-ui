@@ -1,60 +1,91 @@
 const express = require('express');
 const WebSocket = require('ws');
 const http = require('http');
+const { v4: uuidv4 } = require('uuid'); // For unique IDs
 
 const app = express();
 const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
 
-// Predefined list of avatars for demonstration purposes
 const avatars = [
   "https://avatars.githubusercontent.com/u/16860528",
   "https://avatars.githubusercontent.com/u/20110627",
   "https://avatars.githubusercontent.com/u/106103625",
   "https://avatars.githubusercontent.com/u/59228569",
-  "https://avatars.githubusercontent.com/u/59442788",
+  "https://avatars.githubusercontent.com/u/59442788"
 ];
 
-// Handle incoming WebSocket connections
+let messages = []; // In-memory store
+
 wss.on('connection', (ws) => {
-  console.log('A user connected');
+  console.log('User connected');
 
-  // Handle incoming messages from clients
+  // Send all past messages
+  ws.send(JSON.stringify({ type: 'INIT', messages }));
+
   ws.on('message', (message) => {
-    console.log('Received message:', message); // Log raw message received
-
+    console.log('Raw incoming message:', message);
     try {
-      // Check if message is a Buffer, and convert it to string if it is
-      const messageString = message instanceof Buffer ? message.toString() : message;
+      const data = JSON.parse(message);
+      console.log('Received:', data);
 
-      // Parse the message string into an object
-      const data = JSON.parse(messageString);
-
-      // Select avatar based on the user's name (simple example)
-      const avatarUrl = avatars[Math.floor(Math.random() * avatars.length)];
-
-      // Broadcast the message to all connected clients along with the avatar URL
-      wss.clients.forEach((client) => {
-        if (client.readyState === WebSocket.OPEN) {
-          // Send the full message (including user, text, and avatar URL)
-          client.send(JSON.stringify({
+      switch (data.type) {
+        case 'SEND': {
+          const newMessage = {
+            id: uuidv4(),
             user: data.user,
-            message: data.message,
-            avatar: avatarUrl,
-          }));
+            text: data.message,
+            avatar: avatars[Math.floor(Math.random() * avatars.length)],
+            timestamp: Date.now(),
+          };
+          messages.push(newMessage);
+          broadcast({ type: 'NEW_MESSAGE', message: newMessage });
+          break;
         }
-      });
+
+        case 'EDIT':
+          messages = messages.map((msg) =>
+            msg.id === data.id ? { ...msg, text: data.newText } : msg
+          );
+          broadcast({
+            type: 'EDIT_MESSAGE',
+            id: data.id,
+            newText: data.newText,
+          });
+          break;
+
+        case 'DELETE':
+          messages = messages.filter((msg) => msg.id !== data.id);
+          broadcast({ type: 'DELETE_MESSAGE', id: data.id });
+          break;
+
+        case 'CLEAR_ALL':
+          messages = [];
+          broadcast({ type: 'CLEAR_ALL' });
+          break;
+
+        default:
+          console.warn('Unknown type:', data.type);
+      }
     } catch (error) {
-      console.error('Error parsing message:', error);
+      console.error('Message parse error:', error);
     }
   });
 
   ws.on('close', () => {
-    console.log('A user disconnected');
+    console.log('User disconnected');
   });
 });
 
-// Start the Express server and WebSocket server on port 8000
+function broadcast(data) {
+  const msg = JSON.stringify(data);
+  wss.clients.forEach((client) => {
+    if (client.readyState === WebSocket.OPEN) {
+      client.send(msg);
+    }
+  });
+}
+
 server.listen(8000, () => {
   console.log('WebSocket server running on ws://localhost:8000');
 });

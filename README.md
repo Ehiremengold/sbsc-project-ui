@@ -1,76 +1,92 @@
-# SbscWorkspace
+# SBSC Workspace Project
 
-<a alt="Nx logo" href="https://nx.dev" target="_blank" rel="noreferrer"><img src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-logo.png" width="45"></a>
+### Images
+![Join community](/product-images/1.png)
+![Collabrate](/product-images/2.png)
 
-✨ Your new, shiny [Nx workspace](https://nx.dev) is almost ready ✨.
+## Project Overview
+This is a monorepo project using Nx workspace, featuring both Angular and React applications, used to build a collaborative real-time editing tool
 
-Run `npx nx graph` to visually explore what got created. Now, let's get you up to speed!
+## Prerequisites
+- Node.js (v18 or later)
+- npm (v9 or later)
 
-## Finish your remote caching setup
+## Project Structure
+- `angularapp/`: Angular application
+- `reactapp/`: React application
+- `angularapp-e2e/`: End-to-end tests for Angular app
+- `reactapp-e2e/`: End-to-end tests for React app
 
-[Click here to finish setting up your workspace!](https://cloud.nx.app/connect/D3L4gd2jc4)
+## Setup Instructions
 
-
-## Run tasks
-
-To run tasks with Nx use:
-
-```sh
-npx nx <target> <project-name>
+### 1. Clone the Repository
+```bash
+git clone https://github.com/your-username/sbsc-workspace.git
+cd sbsc-workspace
 ```
 
-For example:
-
-```sh
-npx nx build myproject
+### 2. Install Dependencies
+```bash
+npm install
 ```
 
-These targets are either [inferred automatically](https://nx.dev/concepts/inferred-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) or defined in the `project.json` or `package.json` files.
+### 3. Running Applications (All Three Should be Running)
 
-[More about running tasks in the docs &raquo;](https://nx.dev/features/run-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## Add new projects
-
-While you could add new projects to your workspace manually, you might want to leverage [Nx plugins](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) and their [code generation](https://nx.dev/features/generate-code?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) feature.
-
-To install a new plugin you can use the `nx add` command. Here's an example of adding the React plugin:
-```sh
-npx nx add @nx/react
+#### Angular Application
+```bash
+npx nx serve angularapp  # Serve Angular app
+npx nx test angularapp   # Run Angular tests
 ```
 
-Use the plugin's generator to create new projects. For example, to create a new React app or library:
-
-```sh
-# Generate an app
-npx nx g @nx/react:app demo
-
-# Generate a library
-npx nx g @nx/react:lib some-lib
+#### React Application
+```bash
+npx nx serve reactapp    # Serve React app
+npx nx test reactapp     # Run React tests
 ```
 
-You can use `npx nx list` to get a list of installed plugins. Then, run `npx nx list <plugin-name>` to learn about more specific capabilities of a particular plugin. Alternatively, [install Nx Console](https://nx.dev/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) to browse plugins and generators in your IDE.
+## Socket Server
+```bash
+cd angularapp
+node ws-server.js
 
-[Learn more about Nx plugins &raquo;](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) | [Browse the plugin registry &raquo;](https://nx.dev/plugin-registry?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+## Development Tools
+- Nx Workspace for monorepo management
+- Angular v18
+- React v18.3
+- Jest for testing
+- Cypress for E2E testing
+- ESLint for linting
+- Prettier for code formatting
 
+## Key Dependencies
+- React Router DOM
+- RxJS
+- Framer Motion
+- Express
 
-[Learn more about Nx on CI](https://nx.dev/ci/intro/ci-with-nx#ready-get-started-with-your-provider?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+## Recommended IDE Extensions
+- ESLint
+- Prettier
+- Angular Language Service
+- React Developer Tools
 
-## Install Nx Console
+## Build for Production
+```bash
+npx nx build angularapp  # Build Angular app
+npx nx build reactapp    # Build React app
+```
 
-Nx Console is an editor extension that enriches your developer experience. It lets you run tasks, generate code, and improves code autocompletion in your IDE. It is available for VSCode and IntelliJ.
+## Troubleshooting
+- Ensure Node.js and npm are up to date
+- Clear npm cache: `npm cache clean --force`
+- Reinstall dependencies: `rm -rf node_modules && npm install`
 
-[Install Nx Console &raquo;](https://nx.dev/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+## Contributing
+1. Fork the repository
+2. Create a feature branch
+3. Commit changes
+4. Push to the branch
+5. Create a Pull Request
 
-## Useful links
-
-Learn more:
-
-- [Learn about Nx on CI](https://nx.dev/ci/intro/ci-with-nx?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Releasing Packages with Nx release](https://nx.dev/features/manage-releases?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [What are Nx plugins?](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-And join the Nx community:
-- [Discord](https://go.nx.dev/community)
-- [Follow us on X](https://twitter.com/nxdevtools) or [LinkedIn](https://www.linkedin.com/company/nrwl)
-- [Our Youtube channel](https://www.youtube.com/@nxdevtools)
-- [Our blog](https://nx.dev/blog?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+## License
+MIT License
