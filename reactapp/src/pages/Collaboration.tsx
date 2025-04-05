@@ -18,7 +18,7 @@ const Collaboration = () => {
 
   useEffect(() => {
     
-    const socket = new WebSocket('ws://localhost:8000');
+    const socket = new WebSocket('wss://sbsc-project-server.onrender.com');
 
     socketRef.current = socket;
 
