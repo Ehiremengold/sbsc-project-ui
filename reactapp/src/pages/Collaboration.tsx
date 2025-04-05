@@ -17,10 +17,7 @@ const Collaboration = () => {
   const avatar = localStorage.getItem('userAvatar');
 
   useEffect(() => {
-    if (!name || !avatar) {
-      navigate('/');
-      return;
-    }
+    
     const socket = new WebSocket('ws://localhost:8000');
 
     socketRef.current = socket;
@@ -90,7 +87,7 @@ const Collaboration = () => {
         socketRef.current.close();
       }
     };
-  }, []);
+  }, [avatar, name, navigate]);
 
   useEffect(() => {
     inputRef?.current?.focus();
@@ -129,14 +126,8 @@ const Collaboration = () => {
 
   const sendMessage = (data: SendMessageData) => {
     // Retrieve avatar and user name from localStorage
-    const avatarUrl = localStorage.getItem('userAvatar');
     const userName = localStorage.getItem('userName');
-
-    // Validate data object
-    if (!data || typeof data !== 'object' || !data.type) {
-      console.warn('Invalid message attempted:', data);
-      return;
-    }
+    const avatarUrl = localStorage.getItem(`avatar-${userName}`);
 
     // Ensure the user has a name and avatar
     if (!userName || !avatarUrl) {

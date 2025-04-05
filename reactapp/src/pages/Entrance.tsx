@@ -14,10 +14,8 @@ const Entrance = () => {
       return;
     }
     const avatar = assignAvatar(input.trim());
-  
     // Save the name and avatar in localStorage
     localStorage.setItem('userName', input.trim());
-    localStorage.setItem('userAvatar', avatar);
     navigate('/collaboration');
   };
 
