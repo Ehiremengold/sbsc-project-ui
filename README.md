@@ -86,3 +86,9 @@ npx nx serve reactapp
 cd angularapp/ws-server
 node ws-server.js
 ```
+
+## For Testing Purpose
+
+- For Local testing it is advisable to switch the "Env" variable to "Dev" in reactapp/src/pages/Collaboration.tsx. This with the fact that the node server is running
+
+- For Production testing, user may experience a slight delay and have to reload page. Reason been where the server is deployed (Render - free tier).
