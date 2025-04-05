@@ -3,7 +3,7 @@
 ### Images
 
 ![Join community](/product-images/1.png)
-![Collabrate](/product-images/2.png)
+![Collaborate](/product-images/2.png)
 
 ## Project Overview
 
