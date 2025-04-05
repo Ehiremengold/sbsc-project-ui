@@ -33,6 +33,7 @@ export const assignAvatar = (name: string) => {
 
   // Otherwise, randomly assign one and store it
   const random = avatars[Math.floor(Math.random() * avatars.length)];
-  localStorage.setItem(`avatar-${name}`, random.imageUrl);
-  return random;
+  const imageUrl = random.imageUrl;
+  localStorage.setItem(`avatar-${name}`, imageUrl);
+  return imageUrl;
 };

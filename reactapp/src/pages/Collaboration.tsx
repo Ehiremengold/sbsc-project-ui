@@ -3,6 +3,7 @@ import SendButton from '../components/SendButton';
 import { useNavigate } from 'react-router-dom';
 import TeamHeader from '../components/TeamHeader';
 import { Message, SendMessageData } from '../lib/types';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const Collaboration = () => {
   const [text, setText] = useState('');
@@ -12,12 +13,12 @@ const Collaboration = () => {
   const navigate = useNavigate();
 
   // Get user name from localStorage
-  const name = localStorage.getItem('userName') || '';
-  const avatar = localStorage.getItem('userAvatar') || 'https://i.imgur.com/8Kx8x8x.png';
+  const name = localStorage.getItem('userName');
+  const avatar = localStorage.getItem('userAvatar');
 
   useEffect(() => {
     if (!name || !avatar) {
-      navigate('/'); 
+      navigate('/');
       return;
     }
     const socket = new WebSocket('ws://localhost:8000');
@@ -42,7 +43,7 @@ const Collaboration = () => {
 
         switch (data.type) {
           case 'INIT':
-            console.log("INIT received:", data.messages);
+            console.log('INIT received:', data.messages);
             setMessages(data.messages);
             break;
 
@@ -101,7 +102,7 @@ const Collaboration = () => {
 
   const handleSend = () => {
     if (text.trim()) {
-      sendMessage({ type: 'SEND', user: name, message: text });
+      sendMessage({ type: 'SEND', user: name || '', message: text });
       setText('');
     }
   };
@@ -127,27 +128,58 @@ const Collaboration = () => {
   };
 
   const sendMessage = (data: SendMessageData) => {
+    // Retrieve avatar and user name from localStorage
+    const avatarUrl = localStorage.getItem('userAvatar');
+    const userName = localStorage.getItem('userName');
+
+    // Validate data object
     if (!data || typeof data !== 'object' || !data.type) {
       console.warn('Invalid message attempted:', data);
       return;
     }
 
-    if (!socketRef.current || socketRef.current.readyState !== WebSocket.OPEN) {
-      console.warn('WebSocket not ready. Message not sent:', data);
+    // Ensure the user has a name and avatar
+    if (!userName || !avatarUrl) {
+      console.warn('User name or avatar is missing!');
       return;
     }
 
-    socketRef.current.send(JSON.stringify(data));
+    // Add userName and avatar to the message data
+    const messageData = {
+      ...data,
+      user: userName,
+      avatar: avatarUrl,
+    };
+
+    // Check if WebSocket is ready
+    if (!socketRef.current || socketRef.current.readyState !== WebSocket.OPEN) {
+      console.warn('WebSocket not ready. Message not sent:', messageData);
+      return;
+    }
+
+    // Send the message with the user and avatar info
+    socketRef.current.send(JSON.stringify(messageData));
   };
 
   return (
-    <main className="flex flex-col gap-10 h-screen max-w-4xl mx-auto my-auto place-items-center mt-10">
+    <motion.main
+      className="flex flex-col gap-10 h-screen max-w-4xl mx-auto my-auto place-items-center mt-10"
+      initial={{ opacity: 0, y: 40 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6 }}
+    >
       <div className="text-center">
-        <p className="text-[#2E3060] text-xl lg:text-3xl font-medium">
+        <motion.p
+          className="text-[#2E3060] text-xl lg:text-3xl font-medium"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.3 }}
+        >
           Share <span className="font-bold">&#183;</span> Collaborate{' '}
           <span className="font-bold">&#183;</span> Build
-        </p>
+        </motion.p>
       </div>
+
       <div className="border w-4/5 h-[800px] p-3 relative">
         <TeamHeader sendMessage={sendMessage} />
         <div className="h-[2px] bg-[#F26722] w-full mt-2"></div>
@@ -155,55 +187,74 @@ const Collaboration = () => {
         {/* Real-time message display */}
         <div className="h-[620px] overflow-y-scroll mt-5 flex flex-col gap-3 scroll-smooth scrollbar-thin scrollbar-thumb-[#F26722] scrollbar-track-[#F26722]/20">
           {messages.length === 0 && (
-            <div className="text-center text-gray-500 font-semibold mt-5">
+            <motion.div
+              className="text-center text-gray-500 font-semibold mt-5"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5 }}
+            >
               <p>Nothing Here Yet. Start a conversation!</p>
-            </div>
+            </motion.div>
           )}
 
-          {messages.map((message, index) => (
-            <div
-              key={index}
-              className={`flex items-center gap-3 ${
-                message.user === name ? 'justify-end' : 'justify-start'
-              }`}
-            >
-              <img
-                src={message.avatar} // Display the avatar for each user
-                alt="Avatar"
-                className="w-10 h-10 rounded-full"
-              />
-              <div className="bg-[#F26722] text-white p-2 rounded-md max-w-[70%]">
-                {message.text}
-                <div className="text-xs text-gray-200 mt-1">
-                  {new Date(message.timestamp).toLocaleTimeString([], {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                  })}
-                </div>
+          <AnimatePresence>
+            {messages.map((message, index) => (
+              <motion.div
+                key={message.id}
+                className={`flex items-center gap-3 ${
+                  message.user === name ? 'justify-end' : 'justify-start'
+                }`}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.3 }}
+              >
+                <img
+                  src={message.avatar}
+                  alt="Avatar"
+                  className="w-10 h-10 rounded-full"
+                />
+                <div className="bg-[#F26722] text-white p-3 rounded-2xl max-w-[70%] shadow-md space-y-1">
+                  <p className="font-medium break-words">{message.text}</p>
 
-                {message.user === name && (
-                  <div className="text-sm text-right text-gray-400">
-                    <button
-                      onClick={() => handleEdit(message.id, message.text)}
-                      className="mr-2 hover:text-yellow-500"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => handleDelete(message.id)}
-                      className="hover:text-red-500"
-                    >
-                      Delete
-                    </button>
+                  <div className="flex justify-between items-center text-xs text-gray-200 gap-9">
+                    <span>
+                      {new Date(message.timestamp).toLocaleTimeString([], {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })}
+                    </span>
+
+                    {message.user === name && (
+                      <div className="space-x-2 text-right">
+                        <button
+                          onClick={() => handleEdit(message.id, message.text)}
+                          className="transition-colors duration-200"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDelete(message.id)}
+                          className="transition-colors duration-200"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
-            </div>
-          ))}
+                </div>
+              </motion.div>
+            ))}
+          </AnimatePresence>
         </div>
 
         {/* Text input for sending messages */}
-        <div className="flex justify-end items-center gap-4 absolute bottom-5 right-3 left-3">
+        <motion.div
+          className="flex bg-white pt-3 justify-end items-center gap-4 absolute bottom-5 right-3 left-3"
+          initial={{ y: 30, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.3 }}
+        >
           <textarea
             ref={inputRef}
             className="border flex-1 h-10 p-2 rounded-md shadow-md outline-[#F26722] resize-none scroll-none"
@@ -213,9 +264,9 @@ const Collaboration = () => {
             onKeyPress={handleKeyPress}
           />
           <SendButton onClick={handleSend} />
-        </div>
+        </motion.div>
       </div>
-    </main>
+    </motion.main>
   );
 };
 
